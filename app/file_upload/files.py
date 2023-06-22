@@ -7,7 +7,7 @@ from ..core.oauth2 import require_user
 from sqlalchemy.orm import Session
 
 router = APIRouter()
-
+# upload file
 @router.post("/upload", response_model=schemas.FileResponse)
 async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db),user_id: str = Depends(require_user)):
     file_path = file_utils.save_file(file)
