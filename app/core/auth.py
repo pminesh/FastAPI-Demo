@@ -13,6 +13,7 @@ import hashlib
 
 
 router = APIRouter()
+
 ACCESS_TOKEN_EXPIRES_IN = settings.ACCESS_TOKEN_EXPIRES_IN
 REFRESH_TOKEN_EXPIRES_IN = settings.REFRESH_TOKEN_EXPIRES_IN
 
@@ -100,6 +101,7 @@ def login(payload: schemas.LoginUserSchema, response: Response, db: Session = De
 @router.get('/logout', status_code=status.HTTP_200_OK)
 def logout(response: Response, Authorize: AuthJWT = Depends(), user_id: str = Depends(require_user)):
     Authorize.unset_jwt_cookies()
+    # clear cookie
     response.set_cookie('logged_in', '', -1)
 
     return {'status': 'success'}
