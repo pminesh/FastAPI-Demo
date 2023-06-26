@@ -28,24 +28,34 @@ app.include_router(roles.router, tags=['Roles'], prefix='/api/role')
 app.include_router(auth.router, tags=['Auth'], prefix='/api/auth')
 app.include_router(files.router, tags=['Files'], prefix='/api/auth')
 
-connected_clients = set() # Keep track of connected clients
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    connected_clients.add(websocket)  # Add the connected client to the set
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+manager = ConnectionManager()
+
+@app.websocket("/user/{client_id}/ws")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
             ws.device_operations(data)
-            
-            # Send message to all connected clients
-            await broadcast_message(data)
-
+            await manager.broadcast(f"Client #{client_id} says: {data}")
     except Exception as e:
-        connected_clients.remove(websocket)  # Remove from the set
-        print('connected_clients: ', connected_clients)
-
-async def broadcast_message(message: str):
-    for client in connected_clients:
-        await client.send_text(message)
+        manager.disconnect(websocket)
+        await manager.broadcast(f"Client #{client_id} left the chat")
