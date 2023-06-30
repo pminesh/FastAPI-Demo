@@ -20,6 +20,16 @@
                 color: #ffff;
                 font-size: 20px;
             }
+
+            button.del_btn {
+                height: 30px;
+                width: 65px;
+                background-color: red;
+                border: 1px solid;
+                color: #fff;
+                border-radius: 5px;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
@@ -40,6 +50,7 @@
                     <th>Device Id</th>
                     <th>Channel Id</th>
                     <th>Is Dimmable</th>
+                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,13 +67,14 @@
                 document.querySelectorAll("#device_table tbody tr").forEach(function(e){e.remove()})
 
                 for(var d=0;d<=device_data.devices.length;d++){
-                    var name = device_data.devices[d]['name']
-                    var device_type = device_data.devices[d]['device_type']
-                    var app_type = device_data.devices[d]['app_type']
-                    var device_id = device_data.devices[d]['device_id']
-                    var channel_id = device_data.devices[d]['channel_id']
-                    var is_dimmable = device_data.devices[d]['is_dimmable']
-                    var status = device_data.devices[d]['status']                    
+                    var name = device_data.devices[d]['name'];
+                    var device_type = device_data.devices[d]['device_type'];
+                    var app_type = device_data.devices[d]['app_type'];
+                    var device_id = device_data.devices[d]['device_id'];
+                    var channel_id = device_data.devices[d]['channel_id'];
+                    var is_dimmable = device_data.devices[d]['is_dimmable'];
+                    var status = device_data.devices[d]['status'];                    
+                    var id = device_data.devices[d]['id'] ;
 
                     var tbodyRef = document.getElementById('device_table').getElementsByTagName('tbody')[0];
                     var row = document.createElement("tr");
@@ -73,36 +85,43 @@
                     var cell5 = document.createElement("td");
                     var cell6 = document.createElement("td");
                     var cell7 = document.createElement("td");
+                    var cell8 = document.createElement("td");
 
-                    cell1.innerHTML = name
-                    cell2.innerHTML = device_type
-                    cell3.innerHTML = app_type
-                    cell4.innerHTML = status
-                    cell5.innerHTML = device_id
-                    cell6.innerHTML = channel_id
-                    cell7.innerHTML = is_dimmable
+                    cell1.innerHTML = name;
+                    cell2.innerHTML = device_type;
+                    cell3.innerHTML = app_type;
+                    cell4.innerHTML = status;
+                    cell5.innerHTML = device_id;
+                    cell6.innerHTML = channel_id;
+                    cell7.innerHTML = is_dimmable;
+                    cell8.innerHTML = "<button class='del_btn' onClick=deleteDevice('"+id+"','"+device_type+"')>Delete</button>";
 
-                    row.appendChild(cell1)
-                    row.appendChild(cell2)
-                    row.appendChild(cell3)
-                    row.appendChild(cell4)
-                    row.appendChild(cell5)
-                    row.appendChild(cell6)
-                    row.appendChild(cell7)
+                    row.appendChild(cell1);
+                    row.appendChild(cell2);
+                    row.appendChild(cell3);
+                    row.appendChild(cell4);
+                    row.appendChild(cell5);
+                    row.appendChild(cell6);
+                    row.appendChild(cell7);
+                    row.appendChild(cell8);
 
                     tbodyRef.appendChild(row);  
 
                 }
                 
-
-                message.appendChild(content)
-                messages.appendChild(message)
+                message.appendChild(content);
+                messages.appendChild(message);
             };
             function sendMessage(event) {
                 var input = document.getElementById("messageText")
                 ws.send(input.value)
                 input.value = ''
                 event.preventDefault()
+            }
+
+            function deleteDevice(id,device_type) {
+                var del_obj = {'opr':'delete','id':id,'device_type':device_type};
+                ws.send(JSON.stringify(del_obj));
             }
         </script>
     </body>

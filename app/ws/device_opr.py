@@ -31,5 +31,19 @@ def get_devices(db: Session):
         devices = db.query(Device).all()
         return {'status': 'success', 'results': len(devices), 'devices': jsonable_encoder(devices)}
     except Exception as e:
-        print(f"Error adding device: {e}")
+        print(f"Error getting device: {e}")
+        return {}
+    
+def delete_devices(data:dict,db: Session):
+    """
+        delete device from the database.
+    """
+    try:
+        id  = data['id']
+        role_query = db.query(Device).filter(Device.id == id)
+        role_query.delete(synchronize_session=False)
+        db.commit()
+        return {'status': 'success', 'message': "Delete successfully"}
+    except Exception as e:
+        print(f"Error deleting device: {e}")
         return {}
